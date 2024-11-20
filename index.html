@@ -104,7 +104,39 @@
          });
  
          eraWidget.ready();
+        // Existing Highcharts code
+        const onChartLoad = function () {
+            const chart = this,
+                series = chart.series[0];
 
+            setInterval(function () {
+                const x = (new Date()).getTime(), // thời gian hiện tại
+                    y = heartbeatValue; // Giá trị nhịp tim thực tế
+
+                series.addPoint([x, y], true, true);
+                dataBuffer.push([x, y]);
+
+                // Giới hạn bộ đệm dữ liệu trong 30 phút (1800 giây)
+                const thirtyMinutesAgo = x - 1800 * 1000;
+                while (dataBuffer.length > 0 && dataBuffer[0][0] < thirtyMinutesAgo) {
+                    dataBuffer.shift();
+                }
+            }, 1000);
+        };
+
+        // Create the initial data
+        const data = (function () {
+            const data = [];
+            const time = (new Date().getTime());
+
+            for (let i = -19; i <= 0; i += 1) {
+                data.push({
+                    x: time + i * 1000,
+                    y: 0 // Giá trị mặc định cho dữ liệu ban đầu
+                });
+            }
+            return data;
+        }());
 
 
 
