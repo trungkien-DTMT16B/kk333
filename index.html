@@ -3,14 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live MQ135 Gauge</title>
-    <script src="https://code.highcharts.com/highcharts.js"></script>
-    <script src="https://code.highcharts.com/highcharts-more.js"></script>
-    <script src="https://code.highcharts.com/modules/exporting.js"></script>
-    <script src="https://code.highcharts.com/modules/export-data.js"></script>
-    <script src="https://code.highcharts.com/modules/accessibility.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
-    <script src="https://www.unpkg.com/@eohjsc/era-widget@1.0.14/src/index.js"></script>
+    <title>Live Heartbeat Data</title>
     <style>
         .highcharts-figure,
         .highcharts-data-table table {
@@ -58,89 +51,45 @@
         .highcharts-description {
             margin: 0.3rem 10px;
         }
-
-        button {
-            display: block;
-            margin: 1em auto;
-            padding: 0.5em 1em;
-            font-size: 1em;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background-color: #45a049;
-        }
     </style>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/highcharts-more.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/modules/export-data.js"></script>
+    <script src="https://code.highcharts.com/modules/accessibility.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+    <script src="https://www.unpkg.com/@eohjsc/era-widget@1.0.14/src/index.js"></script>
 </head>
 <body>
     <figure class="highcharts-figure">
         <div id="container"></div>
         <p class="highcharts-description">
-            Live MQ135 Sensor Gauge updating dynamically with data from EraWidget.
+            Live Heartbeat Data represented using a gauge chart. Updated every second.
         </p>
+        <button id="exportButton">Export to Excel</button>
     </figure>
-    <button id="exportButton">Export to Excel</button>
-
-    <input type="checkbox" id="MQ135"/>
+    
+<input type="checkbox" id="MQ135"/>
     <script>
-         // Era Widget initialization
-         const eraWidget = new EraWidget();
-         let config = null;
-         let heartbeatValue = 0; // Khởi tạo giá trị nhịp tim mặc định
-         const dataBuffer = [];
- 
-         eraWidget.onConfiguration((configuration) => {
-             config = configuration.realtime_configs[0];
-         });
- 
-         eraWidget.onValues((values) => {
-             const input = document.getElementById('MQ135');
-             heartbeatValue = values[config.id].value; // Giả sử values[config.id].value là nhịp tim thực tế
-             input.checked = values[config.id].value > 0; // Đặt trạng thái của checkbox dựa trên nhịp tim
-         });
- 
-         eraWidget.ready();
-        // Existing Highcharts code
-        const onChartLoad = function () {
-            const chart = this,
-                series = chart.series[0];
+        // Era Widget initialization
+        const eraWidget = new EraWidget();
+        let config = null;
+        let heartbeatValue = 0; // Khởi tạo giá trị nhịp tim mặc định
+        const dataBuffer = [];
 
-            setInterval(function () {
-                const x = (new Date()).getTime(), // thời gian hiện tại
-                    y = heartbeatValue; // Giá trị nhịp tim thực tế
+        eraWidget.onConfiguration((configuration) => {
+            config = configuration.realtime_configs[0];
+        });
 
-                series.addPoint([x, y], true, true);
-                dataBuffer.push([x, y]);
+        eraWidget.onValues((values) => {
+            const input = document.getElementById('MQ135');
+            heartbeatValue = values[config.id].value; // Giả sử values[config.id].value là nhịp tim thực tế
+            input.checked = values[config.id].value > 0; // Đặt trạng thái của checkbox dựa trên nhịp tim
+        });
 
-                // Giới hạn bộ đệm dữ liệu trong 30 phút (1800 giây)
-                const thirtyMinutesAgo = x - 1800 * 1000;
-                while (dataBuffer.length > 0 && dataBuffer[0][0] < thirtyMinutesAgo) {
-                    dataBuffer.shift();
-                }
-            }, 1000);
-        };
+        eraWidget.ready();
 
-        // Create the initial data
-        const data = (function () {
-            const data = [];
-            const time = (new Date().getTime());
-
-            for (let i = -19; i <= 0; i += 1) {
-                data.push({
-                    x: time + i * 1000,
-                    y: 0 // Giá trị mặc định cho dữ liệu ban đầu
-                });
-            }
-            return data;
-        }());
-
-
-
-        // Initialize Highcharts Gauge
+        // Highcharts Gauge Chart
         const chart = Highcharts.chart('container', {
             chart: {
                 type: 'gauge',
@@ -152,7 +101,7 @@
             },
 
             title: {
-                text: 'MQ135 Sensor Monitor'
+                text: 'Live Heartbeat'
             },
 
             pane: {
@@ -165,8 +114,8 @@
 
             yAxis: {
                 min: 0,
-                max: 200,
-                tickPixelInterval: 72,
+                max: 130,
+                tickPixelInterval: 30,
                 tickPosition: 'inside',
                 tickColor: Highcharts.defaultOptions.chart.backgroundColor || '#FFFFFF',
                 tickLength: 20,
@@ -194,56 +143,72 @@
                     },
                     {
                         from: 100,
-                        to: 200,
+                        to: 130,
                         color: '#DF5353', // Red
                         thickness: 20
                     }
                 ]
             },
 
-            series: [{
-                name: 'MQ135',
-                data: [0],
-                tooltip: {
-                    valueSuffix: ' ppm'
-                },
-                dataLabels: {
-                    format: '{y} ppm',
-                    borderWidth: 0,
-                    style: {
-                        fontSize: '16px'
+            series: [
+                {
+                    name: 'Heartbeat',
+                    data: [0], // Initial value
+                    tooltip: {
+                        valueSuffix: ' bpm'
+                    },
+                    dataLabels: {
+                        format: '{y} bpm',
+                        borderWidth: 0,
+                        style: {
+                            fontSize: '16px'
+                        }
+                    },
+                    dial: {
+                        radius: '80%',
+                        backgroundColor: 'gray',
+                        baseWidth: 12,
+                        baseLength: '0%',
+                        rearLength: '0%'
+                    },
+                    pivot: {
+                        backgroundColor: 'gray',
+                        radius: 6
                     }
-                },
-                dial: {
-                    radius: '80%',
-                    backgroundColor: 'gray',
-                    baseWidth: 12,
-                    baseLength: '0%',
-                    rearLength: '0%'
-                },
-                pivot: {
-                    backgroundColor: 'gray',
-                    radius: 6
                 }
-            }]
+            ]
         });
 
-        // Update the gauge dynamically
+        // Update data every second
         setInterval(() => {
-            const point = chart.series[0].points[0];
-            point.update(heartbeatValue);
+            const x = new Date().getTime(); // Current timestamp
+            const y = heartbeatValue; // Actual heartbeat value
+
+            if (chart) {
+                const point = chart.series[0].points[0];
+                point.update(y); // Update the gauge
+            }
+
+            // Store data for export
+            dataBuffer.push([x, y]);
+
+            // Limit the buffer to 30 minutes
+            const thirtyMinutesAgo = x - 1800 * 1000;
+            while (dataBuffer.length > 0 && dataBuffer[0][0] < thirtyMinutesAgo) {
+                dataBuffer.shift();
+            }
         }, 1000);
 
         // Export data to Excel
-        document.getElementById('exportButton').addEventListener('click', function () {
+        document.getElementById('exportButton').addEventListener('click', () => {
             const ws = XLSX.utils.json_to_sheet(dataBuffer.map(point => ({
-                Time: (new Date(point[0])).toLocaleString(),
+                Time: new Date(point[0]).toLocaleString(),
                 Heartbeat: point[1]
             })));
 
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, 'MQ135');
-            XLSX.writeFile(wb, 'MQ135_data.xlsx');
+            XLSX.utils.book_append_sheet(wb, ws, 'HeartbeatData');
+            XLSX.writeFile(wb, 'heartbeat_data.xlsx');
         });
     </script>
 </body>
