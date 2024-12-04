@@ -88,7 +88,7 @@
         // Era Widget initialization
         const eraWidget = new EraWidget();
         let config = null;
-        let heartbeatValue = 0; // Khởi tạo giá trị nhịp tim mặc định
+        let dobuiValue = 0; // Khởi tạo giá trị nhịp tim mặc định
         const dataBuffer = [];
 
         eraWidget.onConfiguration((configuration) => {
@@ -96,8 +96,8 @@
         });
 
         eraWidget.onValues((values) => {
-            const input = document.getElementById('MQ135');
-            heartbeatValue = values[config.id].value; // Giả sử values[config.id].value là nhịp tim thực tế
+            const input = document.getElementById('buibui');
+            dobuiValue = values[config.id].value; // Giả sử values[config.id].value là nhịp tim thực tế
             input.checked = values[config.id].value > 0; // Đặt trạng thái của checkbox dựa trên nhịp tim
         });
 
@@ -196,7 +196,7 @@
         // Update data every second
         setInterval(() => {
             const x = new Date().getTime(); // Current timestamp
-            const y = heartbeatValue; // Actual heartbeat value
+            const y = dobuiValue; // Actual heartbeat value
 
             if (chart) {
                 const point = chart.series[0].points[0];
@@ -221,7 +221,7 @@
             })));
 
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, 'HeartbeatData');
+            XLSX.utils.book_append_sheet(wb, ws, 'buibui');
             XLSX.writeFile(wb, 'DoBui.xlsx');
         });
     </script>
